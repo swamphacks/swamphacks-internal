@@ -1,11 +1,58 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
+import {Route, Switch, Redirect} from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import {withFirebase} from './components/Firebase';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Box from '@material-ui/core/Box';
 
-const App = () => {
+const LoadingBox = () => {
   return (
-    <div>
-      <h1>App</h1>
-    </div>
+    <Box
+      bgcolor='background.paper'
+      style={{
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <CircularProgress />
+    </Box>
   );
 };
 
-export default App;
+const App = ({firebase}) => {
+  const [signedIn, setSignedIn] = useState(null);
+
+  useEffect(() => {
+    setSignedIn(firebase.checkSignedIn());
+  }, []);
+
+  const PrivateRoute = ({children: Component, ...rest}) => (
+    <Route
+      {...rest}
+      render={props =>
+        signedIn === true ? <Component {...props} /> : <Redirect to='/login' />
+      }
+    />
+  );
+
+  if (signedIn === null) {
+    return <LoadingBox />;
+  }
+
+  return (
+    <Switch>
+      <PrivateRoute exact path='/'>
+        <Home />
+      </PrivateRoute>
+      <Route exact path='/login'>
+        <Login />
+      </Route>
+    </Switch>
+  );
+};
+
+export default withFirebase(App);
