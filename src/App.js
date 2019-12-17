@@ -14,6 +14,7 @@ import Box from '@material-ui/core/Box';
 import Home from './pages/Home';
 import CheckIn from './pages/CheckIn';
 import Login from './pages/Login';
+import NFCScan from './pages/NFCScan';
 
 // Styles
 const useStyles = makeStyles(theme => ({
@@ -57,6 +58,12 @@ const routes = [
     path: '/check-in',
     exact: true,
     main: CheckIn
+  },
+  {
+    label: 'NFC Scan',
+    path: '/nfc-scan',
+    exact: true,
+    main: NFCScan
   }
 ];
 
@@ -103,7 +110,7 @@ const App = ({firebase}) => {
 
   return (
     <div className={classes.root}>
-      <Navbar paths={paths} />
+      <Navbar paths={paths} signedIn={signedIn} />
       <div className={classes.content}>
         <div className={classes.toolbar} />
         <Switch>

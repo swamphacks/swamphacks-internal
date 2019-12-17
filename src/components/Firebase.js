@@ -20,7 +20,6 @@ class Firebase {
   checkSignedIn = callback => {
     const unsubscriber = this.auth.onAuthStateChanged(user => {
       const val = user !== null ? true : false;
-      console.log(val);
       callback(val);
     });
     return unsubscriber;
