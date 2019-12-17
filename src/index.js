@@ -6,9 +6,13 @@ import * as serviceWorker from './serviceWorker';
 import {BrowserRouter as Router} from 'react-router-dom';
 import Firebase, {FirebaseContext} from './components/Firebase';
 
+// Material UI
+import CssBaseline from '@material-ui/core/CssBaseline';
+
 ReactDOM.render(
   <FirebaseContext.Provider value={new Firebase()}>
     <Router>
+      <CssBaseline />
       <App />
     </Router>
   </FirebaseContext.Provider>,

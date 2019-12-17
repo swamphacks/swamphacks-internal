@@ -13,9 +13,17 @@ class Firebase {
     this.auth = firebase.auth();
   }
 
-  checkSignedIn = () => {
-    console.log(this.auth.currentUser);
-    return this.auth.currentUser ? true : false;
+  signOut = async () => {
+    await this.auth.signOut();
+  };
+
+  checkSignedIn = callback => {
+    const unsubscriber = this.auth.onAuthStateChanged(user => {
+      const val = user !== null ? true : false;
+      console.log(val);
+      callback(val);
+    });
+    return unsubscriber;
   };
 }
 
