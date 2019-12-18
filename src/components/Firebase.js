@@ -13,14 +13,34 @@ class Firebase {
     this.auth = firebase.auth();
   }
 
+  signIn = async (email, password) => {
+    await this.auth.signInWithEmailAndPassword(email, password);
+  };
+
   signOut = async () => {
     await this.auth.signOut();
   };
 
   checkSignedIn = callback => {
     const unsubscriber = this.auth.onAuthStateChanged(user => {
-      const val = user !== null ? true : false;
+      const val =
+        user !== null && user.email === 'sponsors@swamphacks.com'
+          ? true
+          : false;
       callback(val);
+    });
+    return unsubscriber;
+  };
+
+  getMetaSize = (doc, callback) => {
+    const ref = this.firestore
+      .collection('years')
+      .doc('2020')
+      .collection('metadata')
+      .doc(doc);
+    const unsubscriber = ref.onSnapshot(snap => {
+      const data = snap.data();
+      callback(data.size);
     });
     return unsubscriber;
   };
