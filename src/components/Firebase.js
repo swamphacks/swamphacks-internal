@@ -15,6 +15,7 @@ class Firebase {
 
   signIn = async (email, password) => {
     await this.auth.signInWithEmailAndPassword(email, password);
+    return this.auth.currentUser.email === 'sponsors@swamphacks.com';
   };
 
   signOut = async () => {
