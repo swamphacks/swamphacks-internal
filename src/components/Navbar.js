@@ -1,11 +1,12 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {useLocation, useHistory} from 'react-router-dom';
 
 // Custom
 import {withFirebase} from '../components/Firebase';
 
 // Material UI
-import {makeStyles} from '@material-ui/core/styles';
+import {makeStyles, useTheme} from '@material-ui/core/styles';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
 import AppBar from '@material-ui/core/AppBar';
 import Drawer from '@material-ui/core/Drawer';
 import List from '@material-ui/core/List';
@@ -14,6 +15,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
+import IconButton from '@material-ui/core/IconButton';
+import MenuIcon from '@material-ui/icons/Menu';
 
 const drawerWidth = 240;
 
@@ -35,23 +38,37 @@ const useStyles = makeStyles(theme => ({
   drawerPaper: {
     width: drawerWidth
   },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(3)
+  menuButton: {
+    marginRight: theme.spacing(2)
   },
   toolbar: theme.mixins.toolbar
 }));
 
 const Navbar = ({firebase, paths, signedIn}) => {
+  // Hooks
+  const [isOpen, setIsOpen] = useState(false);
   const classes = useStyles();
   const location = useLocation();
   const history = useHistory();
+  const theme = useTheme();
+  const isComputer = useMediaQuery(theme.breakpoints.up('sm'));
+  // Render
   return (
     <React.Fragment>
       <AppBar position='fixed' className={classes.appBar}>
         <Toolbar>
+          {!isComputer && (
+            <IconButton
+              edge='start'
+              className={classes.menuButton}
+              color='inherit'
+              onClick={() => setIsOpen(!isOpen)}
+            >
+              <MenuIcon />
+            </IconButton>
+          )}
           <Typography variant='h6' noWrap className={classes.title}>
-            SwampHacks Internal Site
+            SwampHacks Internal
           </Typography>
           {signedIn && (
             <Button color='inherit' onClick={() => firebase.signOut()}>
@@ -63,7 +80,9 @@ const Navbar = ({firebase, paths, signedIn}) => {
       {signedIn && (
         <Drawer
           className={classes.drawer}
-          variant='permanent'
+          variant={isComputer ? 'permanent' : 'temporary'}
+          open={isComputer ? true : isOpen}
+          onClose={() => setIsOpen(false)}
           classes={{
             paper: classes.drawerPaper
           }}
@@ -74,7 +93,12 @@ const Navbar = ({firebase, paths, signedIn}) => {
               <ListItem
                 button
                 key={label + index}
-                onClick={() => history.push(path)}
+                onClick={() => {
+                  if (!isComputer) {
+                    setIsOpen(false);
+                  }
+                  history.push(path);
+                }}
               >
                 <ListItemText
                   primary={label}
