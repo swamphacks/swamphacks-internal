@@ -19,7 +19,8 @@ import NFCScan from './pages/NFCScan';
 // Styles
 const useStyles = makeStyles(theme => ({
   root: {
-    display: 'flex'
+    display: 'flex',
+    minHeight: '100vh'
   },
   content: {
     flexGrow: 1,

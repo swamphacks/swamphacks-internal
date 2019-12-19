@@ -32,15 +32,20 @@ class Firebase {
     return unsubscriber;
   };
 
-  getMetaSize = (doc, callback) => {
+  getMetadata = callback => {
     const ref = this.firestore
       .collection('years')
       .doc('2020')
-      .collection('metadata')
-      .doc(doc);
+      .collection('metadata');
     const unsubscriber = ref.onSnapshot(snap => {
-      const data = snap.data();
-      callback(data.size);
+      const docs = snap.docs;
+      let datas = {};
+      docs.forEach(doc => {
+        const label = doc.id;
+        const data = doc.data();
+        datas[label] = data;
+      });
+      callback(datas);
     });
     return unsubscriber;
   };

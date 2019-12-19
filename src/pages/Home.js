@@ -1,50 +1,57 @@
 import React, {useState, useEffect} from 'react';
 
 // Material UI
+import {makeStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 
 // Custom Components
 import {withFirebase} from '../components/Firebase';
 import SimpleDataDisplay from '../components/SimpleDataDisplay';
+import PageTitle from '../components/PageTitle';
+
+// Styles
+const useStyles = makeStyles(theme => ({
+  root: {}
+}));
 
 // Datas
 const datas = [
   {
     label: 'Hacker Applications',
-    index: 'numApplications'
+    index: 'applications',
+    field: 'size'
   },
   {
     label: 'Mentor/Volunteer Applications',
-    index: 'numMVApplications'
+    index: 'mentorVolunteerApplications',
+    field: 'size'
   }
 ];
 
 const Home = ({firebase}) => {
-  const [numApplications, setNumApplications] = useState(null);
-  const [numMVApplications, setNumMVApplications] = useState(null);
-  const state = {numApplications, numMVApplications};
+  const classes = useStyles();
+  const [data, setData] = useState({
+    applications: null,
+    mentorVolunteerApplications: null
+  });
 
   useEffect(() => {
-    const unsubscribe1 = firebase.getMetaSize('applications', val =>
-      setNumApplications(val)
-    );
-    const unsubscribe2 = firebase.getMetaSize(
-      'mentorVolunteerApplications',
-      val => setNumMVApplications(val)
-    );
-    return () => {
-      unsubscribe1();
-      unsubscribe2();
-    };
+    const unsubscribe = firebase.getMetadata(val => {
+      setData(val);
+    });
+    return unsubscribe;
   }, []);
 
   return (
     <div>
-      <h1>Home</h1>
+      <PageTitle>Home</PageTitle>
       <Grid container spacing={2}>
         {datas.map((d, index) => (
-          <Grid key={d.index} item xs={12} md={3}>
-            <SimpleDataDisplay label={d.label} data={state[d.index]} />
+          <Grid key={d.index + d.field} item xs={12} md={6} lg={4}>
+            <SimpleDataDisplay
+              label={d.label}
+              data={data[d.index] !== null ? data[d.index][d.field] : null}
+            />
           </Grid>
         ))}
       </Grid>
