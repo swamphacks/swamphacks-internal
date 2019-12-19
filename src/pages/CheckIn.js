@@ -163,8 +163,8 @@ const CheckIn = ({firebase}) => {
                   Name: {name} <br /> School: {school} <br /> Email: {email}
                 </DialogContentText>
                 <DialogContentText>
-                  Check that the student's name on their ID matches the name
-                  listed above. If so, please assign the student an NFC tag.
+                  Check that the hacker's name on their ID matches the name
+                  listed above. If so, please assign the hacker an NFC tag.
                 </DialogContentText>
                 {isSubmitting ? (
                   <LoadingBox />
