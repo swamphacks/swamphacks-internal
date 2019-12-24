@@ -22,6 +22,11 @@ const datas = [
     field: 'size'
   },
   {
+    label: 'Confirmed Hackers',
+    index: 'applications',
+    field: 'confirmedSize'
+  },
+  {
     label: 'Mentor/Volunteer Applications',
     index: 'mentorVolunteerApplications',
     field: 'size'
