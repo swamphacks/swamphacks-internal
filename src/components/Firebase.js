@@ -34,18 +34,9 @@ class Firebase {
   };
 
   getMetadata = callback => {
-    const ref = this.firestore
-      .collection('years')
-      .doc('2020')
-      .collection('metadata');
+    const ref = this.firestore.collection('years').doc('2020');
     const unsubscriber = ref.onSnapshot(snap => {
-      const docs = snap.docs;
-      let datas = {};
-      docs.forEach(doc => {
-        const label = doc.id;
-        const data = doc.data();
-        datas[label] = data;
-      });
+      const datas = snap.data().data;
       callback(datas);
     });
     return unsubscriber;

@@ -18,26 +18,29 @@ const useStyles = makeStyles(theme => ({
 const datas = [
   {
     label: 'Hacker Applications',
-    index: 'applications',
-    field: 'size'
+    index: 'numHackers'
   },
   {
     label: 'Confirmed Hackers',
-    index: 'applications',
-    field: 'confirmedSize'
+    index: 'numHackersConfirmed'
   },
   {
-    label: 'Mentor/Volunteer Applications',
-    index: 'mentorVolunteerApplications',
-    field: 'size'
+    label: 'Mentor Applications',
+    index: 'numMentors'
+  },
+  {
+    label: 'Volunteer Applications',
+    index: 'numVolunteers'
   }
 ];
 
 const Home = ({firebase}) => {
   const classes = useStyles();
   const [data, setData] = useState({
-    applications: null,
-    mentorVolunteerApplications: null
+    numHackers: null,
+    numHackersConfirmed: null,
+    numMentors: null,
+    numVolunteers: null
   });
 
   useEffect(() => {
@@ -52,10 +55,10 @@ const Home = ({firebase}) => {
       <PageTitle>Home</PageTitle>
       <Grid container spacing={2}>
         {datas.map((d, index) => (
-          <Grid key={d.index + d.field} item xs={12} md={6} lg={4}>
+          <Grid key={d.index} item xs={12} md={6} lg={4}>
             <SimpleDataDisplay
               label={d.label}
-              data={data[d.index] !== null ? data[d.index][d.field] : null}
+              data={data[d.index] !== null ? data[d.index] : null}
             />
           </Grid>
         ))}
