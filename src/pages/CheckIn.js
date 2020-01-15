@@ -77,18 +77,27 @@ const CheckIn = ({firebase}) => {
   const [manualUsers, setManualUsers] = useState([]);
 
   // Functions
-  const _handleSubmitStandard = (values, formikBag) => {
+  const _handleSubmitStandard = async (values, formikBag) => {
     // Check if the user exists
-    // Make sure the user is not already checked-in
-    const u = _createUser({
-      firstName: 'Zachary',
-      lastName: 'Cowan',
-      email: 'example@gmail.com',
-      school: 'University of Florida',
-      uid: '1234'
-    });
-    formikBag.setSubmitting(false);
-    setUser(u);
+    try {
+      const {data} = await firebase.getHackerByCode({
+        code: values.code.toUpperCase(),
+        checkIn: true
+      });
+      const {docData, docID} = data;
+      const u = _createUser({
+        firstName: docData.firstName,
+        lastName: docData.lastName,
+        email: docData.email,
+        school: docData.school,
+        docID: docID
+      });
+      formikBag.setSubmitting(false);
+      setUser(u);
+    } catch (error) {
+      formikBag.setFieldError('code', error.message);
+      formikBag.setSubmitting(false);
+    }
   };
 
   const _handleSubmitManual = (values, formikBag) => {
@@ -101,14 +110,14 @@ const CheckIn = ({firebase}) => {
       lastName: 'Cowan',
       email: 'example@gmail.com',
       school: 'University of Florida',
-      uid: '1234'
+      docID: '1234'
     });
     const u2 = _createUser({
       firstName: 'Zachary',
       lastName: 'Cowan',
       email: 'example2@gmail.com',
       school: 'University of Alabama',
-      uid: '1234'
+      docID: '1234'
     });
     formikBag.setSubmitting(false);
     setManualUsers([u1, u2]);
@@ -119,19 +128,22 @@ const CheckIn = ({firebase}) => {
     setManualUsers([]);
   };
 
-  const _handleSubmitNFC = (values, formikBag) => {
-    // Assign tagID to user
-    // Set checked-in to true
-    // Set a check-in time
-    formikBag.setSubmitting(false);
-    setUser(null);
+  const _handleSubmitNFC = async (values, formikBag) => {
+    try {
+      await firebase.checkIn({docID: user.docID, nfcID: values.tagID});
+      formikBag.setSubmitting(false);
+      setUser(null);
+    } catch (error) {
+      formikBag.setFieldError('tagID', error.message);
+      formikBag.setSubmitting(false);
+    }
   };
 
-  const _createUser = ({firstName, lastName, email, school, uid}) => ({
+  const _createUser = ({firstName, lastName, email, school, docID}) => ({
     name: firstName + ' ' + lastName,
     email: email,
     school: school,
-    uid: uid
+    docID: docID
   });
 
   // Components

@@ -1,6 +1,7 @@
 import firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/firestore';
+import 'firebase/functions';
 import React from 'react';
 import firebaseConfig from '../firebaseConfig.json';
 
@@ -11,6 +12,9 @@ class Firebase {
     firebase.initializeApp(firebaseConfig);
     this.firestore = firebase.firestore();
     this.auth = firebase.auth();
+    this.functions = firebase.functions();
+    this.checkIn = this.functions.httpsCallable('checkIn');
+    this.getHackerByCode = this.functions.httpsCallable('getHackerByCode');
   }
 
   signIn = async (email, password) => {
