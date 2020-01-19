@@ -95,32 +95,59 @@ const CheckIn = ({firebase}) => {
       formikBag.setSubmitting(false);
       setUser(u);
     } catch (error) {
-      formikBag.setFieldError('code', error.message);
       formikBag.setSubmitting(false);
+      formikBag.setFieldError('code', error.message);
     }
   };
 
-  const _handleSubmitManual = (values, formikBag) => {
+  const _handleSubmitManual = async (values, formikBag) => {
     // Get a list of users with matching first and last name
     // Filter out users who have already been checked-in
     // If there are multiple users, show select dialog
     // NOTE: Make sure to account for case
-    const u1 = _createUser({
-      firstName: 'Zachary',
-      lastName: 'Cowan',
-      email: 'example@gmail.com',
-      school: 'University of Florida',
-      docID: '1234'
-    });
-    const u2 = _createUser({
-      firstName: 'Zachary',
-      lastName: 'Cowan',
-      email: 'example2@gmail.com',
-      school: 'University of Alabama',
-      docID: '1234'
-    });
-    formikBag.setSubmitting(false);
-    setManualUsers([u1, u2]);
+    try {
+      const {data} = await firebase.getHackersByName({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        checkIn: true
+      });
+      const {hackersFound} = data;
+      if (hackersFound.size > 1) {
+        let createdUsers = [];
+        hackersFound.forEach(hacker => {
+          const {docData, docID} = hacker;
+          const u = _createUser({
+            firstName: docData.firstName,
+            lastName: docData.lastName,
+            email: docData.email,
+            school: docData.school,
+            docID: docID
+          });
+          createdUsers.push(u);
+        });
+        formikBag.setSubmitting(false);
+        setManualUsers(createdUsers);
+      } else {
+        let createdUser = null;
+        hackersFound.forEach(hacker => {
+          const {docData, docID} = hacker;
+          const u = _createUser({
+            firstName: docData.firstName,
+            lastName: docData.lastName,
+            email: docData.email,
+            school: docData.school,
+            docID: docID
+          });
+          createdUser = u;
+        });
+        formikBag.setSubmitting(false);
+        setUser(createdUser);
+      }
+    } catch (error) {
+      formikBag.setSubmitting(false);
+      formikBag.setFieldError('firstName', error.message);
+      formikBag.setFieldError('lastName', error.message);
+    }
   };
 
   const _selectManualUser = mu => {

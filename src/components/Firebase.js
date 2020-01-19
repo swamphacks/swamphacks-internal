@@ -15,6 +15,7 @@ class Firebase {
     this.functions = firebase.functions();
     this.checkIn = this.functions.httpsCallable('checkIn');
     this.getHackerByCode = this.functions.httpsCallable('getHackerByCode');
+    this.getHackersByName = this.functions.httpsCallable('getHackersByName');
   }
 
   signIn = async (email, password) => {
