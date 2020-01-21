@@ -1,9 +1,9 @@
-import React, {useState} from 'react';
-import {Formik, Form} from 'formik';
+import React, { useState } from 'react';
+import { Formik, Form } from 'formik';
 import * as yup from 'yup';
 
 // Material UI
-import {makeStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -20,7 +20,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 
 // Custom Components
-import {withFirebase} from '../components/Firebase';
+import { withFirebase } from '../components/Firebase';
 import PageTitle from '../components/PageTitle';
 
 // Styles
@@ -70,7 +70,7 @@ const nfcSchema = yup.object().shape({
     .required('This field is required.')
 });
 
-const CheckIn = ({firebase}) => {
+const CheckIn = ({ firebase }) => {
   // Hooks
   const classes = useStyles();
   const [user, setUser] = useState(null);
@@ -80,16 +80,16 @@ const CheckIn = ({firebase}) => {
   const _handleSubmitStandard = async (values, formikBag) => {
     // Check if the user exists
     try {
-      const {data} = await firebase.getHackerByCode({
-        code: values.code.toUpperCase(),
+      const { data } = await firebase.getHackerByCode({
+        code: values.code,
         checkIn: true
       });
-      const {docData, docID} = data;
+      const { docData, docID } = data;
       const u = _createUser({
-        firstName: docData.firstName,
-        lastName: docData.lastName,
+        firstName: docData.applicationData.firstName,
+        lastName: docData.applicationData.lastName,
         email: docData.email,
-        school: docData.school,
+        school: docData.applicationData.school,
         docID: docID
       });
       formikBag.setSubmitting(false);
@@ -106,21 +106,21 @@ const CheckIn = ({firebase}) => {
     // If there are multiple users, show select dialog
     // NOTE: Make sure to account for case
     try {
-      const {data} = await firebase.getHackersByName({
+      const { data } = await firebase.getHackersByName({
         firstName: values.firstName,
         lastName: values.lastName,
         checkIn: true
       });
-      const {hackersFound} = data;
-      if (hackersFound.size > 1) {
+      const { hackersFound } = data;
+      if (hackersFound.length > 1) {
         let createdUsers = [];
         hackersFound.forEach(hacker => {
-          const {docData, docID} = hacker;
+          const { docData, docID } = hacker;
           const u = _createUser({
-            firstName: docData.firstName,
-            lastName: docData.lastName,
+            firstName: docData.applicationData.firstName,
+            lastName: docData.applicationData.lastName,
             email: docData.email,
-            school: docData.school,
+            school: docData.applicationData.school,
             docID: docID
           });
           createdUsers.push(u);
@@ -130,12 +130,12 @@ const CheckIn = ({firebase}) => {
       } else {
         let createdUser = null;
         hackersFound.forEach(hacker => {
-          const {docData, docID} = hacker;
+          const { docData, docID } = hacker;
           const u = _createUser({
-            firstName: docData.firstName,
-            lastName: docData.lastName,
+            firstName: docData.applicationData.firstName,
+            lastName: docData.applicationData.lastName,
             email: docData.email,
-            school: docData.school,
+            school: docData.applicationData.school,
             docID: docID
           });
           createdUser = u;
@@ -157,7 +157,13 @@ const CheckIn = ({firebase}) => {
 
   const _handleSubmitNFC = async (values, formikBag) => {
     try {
-      await firebase.checkIn({docID: user.docID, nfcID: values.tagID});
+      await firebase.checkIn({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        docID: user.docID,
+        nfcID: values.tagID
+      });
       formikBag.setSubmitting(false);
       setUser(null);
     } catch (error) {
@@ -166,7 +172,7 @@ const CheckIn = ({firebase}) => {
     }
   };
 
-  const _createUser = ({firstName, lastName, email, school, docID}) => ({
+  const _createUser = ({ firstName, lastName, email, school, docID }) => ({
     name: firstName + ' ' + lastName,
     email: email,
     school: school,
@@ -182,7 +188,7 @@ const CheckIn = ({firebase}) => {
       <Dialog open={user !== null ? true : false}>
         <DialogTitle>Assign NFC Tag</DialogTitle>
         <Formik
-          initialValues={{tagID: ''}}
+          initialValues={{ tagID: '' }}
           validationSchema={nfcSchema}
           validateOnBlur={false}
           validateOnChange={false}
@@ -210,7 +216,7 @@ const CheckIn = ({firebase}) => {
                 ) : (
                   <TextField
                     className={classes.textField}
-                    inputProps={{maxLength: 10}}
+                    inputProps={{ maxLength: 10 }}
                     autoFocus
                     type='text'
                     label='NFC Tag ID'
@@ -245,7 +251,7 @@ const CheckIn = ({firebase}) => {
     <Box component='section' className={classes.container}>
       <Typography variant='h6'>Standard Check-In</Typography>
       <Formik
-        initialValues={{code: ''}}
+        initialValues={{ code: '' }}
         validationSchema={standardSchema}
         validateOnBlur={false}
         validateOnChange={false}
@@ -265,7 +271,7 @@ const CheckIn = ({firebase}) => {
             ) : (
               <TextField
                 className={classes.textField}
-                inputProps={{maxLength: 4}}
+                inputProps={{ maxLength: 4 }}
                 autoFocus
                 type='text'
                 label='Check-In Code'
@@ -297,7 +303,7 @@ const CheckIn = ({firebase}) => {
     <Box component='section' className={classes.container}>
       <Typography variant='h6'>Manual Check-In</Typography>
       <Formik
-        initialValues={{firstName: '', lastName: ''}}
+        initialValues={{ firstName: '', lastName: '' }}
         validationSchema={manualSchema}
         validateOnBlur={false}
         validateOnChange={false}

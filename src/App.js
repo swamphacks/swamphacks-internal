@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
-import {Route, Switch, Redirect} from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Route, Switch, Redirect } from 'react-router-dom';
 
 // Custom
-import {withFirebase} from './components/Firebase';
+import { withFirebase } from './components/Firebase';
 import Navbar from './components/Navbar';
 
 // Material UI
-import {makeStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import Box from '@material-ui/core/Box';
 
@@ -14,7 +14,7 @@ import Box from '@material-ui/core/Box';
 import Home from './pages/Home';
 import CheckIn from './pages/CheckIn';
 import Login from './pages/Login';
-import NFCScan from './pages/NFCScan';
+import ScanPage from './pages/Scan';
 
 // Styles
 const useStyles = makeStyles(theme => ({
@@ -61,22 +61,22 @@ const routes = [
     main: CheckIn
   },
   {
-    label: 'NFC Scan',
-    path: '/nfc-scan',
+    label: 'Scan',
+    path: '/scan',
     exact: true,
-    main: NFCScan
+    main: ScanPage
   }
 ];
 
 // Paths
 const paths = [
-  ...routes.map(({label, path}) => ({
+  ...routes.map(({ label, path }) => ({
     label: label,
     path: path
   }))
 ];
 
-const App = ({firebase}) => {
+const App = ({ firebase }) => {
   const [signedIn, setSignedIn] = useState(null);
   const classes = useStyles();
 
@@ -85,7 +85,7 @@ const App = ({firebase}) => {
     return () => unsubscribe();
   }, []);
 
-  const PrivateRoute = ({children, ...rest}) => {
+  const PrivateRoute = ({ children, ...rest }) => {
     return (
       <Route
         {...rest}
@@ -96,7 +96,7 @@ const App = ({firebase}) => {
             <Redirect
               to={{
                 pathname: '/login',
-                state: {from: rest.path}
+                state: { from: rest.path }
               }}
             />
           )
