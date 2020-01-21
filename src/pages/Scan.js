@@ -46,7 +46,7 @@ const useStyles = makeStyles(theme => ({
 
 const availableTokens = [{ label: 'Dinner 1', value: 'dinner1' }];
 
-const schema = yup.object().shape({
+const standardSchema = yup.object().shape({
   token: yup.string().required('This field is required.'),
   tagID: yup
     .string()
@@ -72,6 +72,11 @@ const ScanPage = () => {
   const standardSubmit = (values, formikBag) => {
     console.log(values);
     formikBag.setSubmitting(false);
+    showAlert({
+      title: 'Success',
+      description: `Successfully consumed token ${values.token}.`,
+      severity: 'success'
+    });
   };
 
   const LoadingBox = () => (
@@ -82,10 +87,10 @@ const ScanPage = () => {
   const StandardForm = () => {
     return (
       <Box component='section' className={classes.container}>
-        <Typography variant='h6'>Token Consumer</Typography>
+        <Typography variant='h6'>Standard Token Consumer</Typography>
         <Formik
           initialValues={{ token: '', tagID: '' }}
-          validationSchema={schema}
+          validationSchema={standardSchema}
           validateOnBlur={false}
           validateOnChange={false}
           onSubmit={standardSubmit}
@@ -161,6 +166,12 @@ const ScanPage = () => {
       <Box>
         <StandardForm />
       </Box>
+      {alert !== null && (
+        <Alert severity={alert.severity}>
+          <AlertTitle>{alert.title}</AlertTitle>
+          {alert.description}
+        </Alert>
+      )}
     </Box>
   );
 };
