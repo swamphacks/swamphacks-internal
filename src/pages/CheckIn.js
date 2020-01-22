@@ -173,7 +173,7 @@ const CheckIn = ({ firebase }) => {
   };
 
   const _handleSubmitNFC = async (values, formikBag) => {
-    setAlert(null);
+    console.log(user);
     try {
       await firebase.checkIn({
         firstName: user.firstName,
@@ -183,9 +183,11 @@ const CheckIn = ({ firebase }) => {
         nfcID: values.tagID
       });
       formikBag.setSubmitting(false);
+      const fName = user.firstName;
+      const lName = user.lastName;
       showAlert({
         title: `Success`,
-        description: `${user.firstName} ${user.lastName} has been successfully checked in.`,
+        description: `${fName} ${lName} has been successfully checked in.`,
         severity: 'success'
       });
       setUser(null);
@@ -201,7 +203,8 @@ const CheckIn = ({ firebase }) => {
   };
 
   const _createUser = ({ firstName, lastName, email, school, docID }) => ({
-    name: firstName + ' ' + lastName,
+    firstName: firstName,
+    lastName: lastName,
     email: email,
     school: school,
     docID: docID
@@ -209,7 +212,7 @@ const CheckIn = ({ firebase }) => {
 
   // Components
   const NFCModal = () => {
-    const name = user !== null ? user.name : 'Error';
+    const name = user !== null ? `${user.firstName} ${user.lastName}` : 'Error';
     const email = user !== null ? user.email : 'Error';
     const school = user !== null ? user.school : 'Error';
     return (
@@ -397,7 +400,10 @@ const CheckIn = ({ firebase }) => {
   );
 
   const ManualUsersModal = () => {
-    const name = manualUsers.length > 0 ? manualUsers[0].name : 'Error';
+    const name =
+      manualUsers.length > 0
+        ? `${manualUsers[0].firstName} ${manualUsers[0].lastName}`
+        : 'Error';
     return (
       <Dialog onClose={() => setManualUsers([])} open={manualUsers.length > 0}>
         <DialogTitle>Select a Hacker</DialogTitle>
