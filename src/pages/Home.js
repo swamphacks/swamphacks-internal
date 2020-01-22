@@ -1,11 +1,11 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 
 // Material UI
-import {makeStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 
 // Custom Components
-import {withFirebase} from '../components/Firebase';
+import { withFirebase } from '../components/Firebase';
 import SimpleDataDisplay from '../components/SimpleDataDisplay';
 import PageTitle from '../components/PageTitle';
 
@@ -25,6 +25,10 @@ const datas = [
     index: 'numHackersConfirmed'
   },
   {
+    label: 'Hackers Attended',
+    index: 'numHackersAttended'
+  },
+  {
     label: 'Mentor Applications',
     index: 'numMentors'
   },
@@ -34,13 +38,14 @@ const datas = [
   }
 ];
 
-const Home = ({firebase}) => {
+const Home = ({ firebase }) => {
   const classes = useStyles();
   const [data, setData] = useState({
     numHackers: null,
     numHackersConfirmed: null,
     numMentors: null,
-    numVolunteers: null
+    numVolunteers: null,
+    numHackersAttended: null
   });
 
   useEffect(() => {

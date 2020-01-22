@@ -18,6 +18,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import { Alert, AlertTitle } from '@material-ui/lab';
+import Zoom from '@material-ui/core/Zoom';
 
 // Custom Components
 import { withFirebase } from '../components/Firebase';
@@ -75,9 +77,15 @@ const CheckIn = ({ firebase }) => {
   const classes = useStyles();
   const [user, setUser] = useState(null);
   const [manualUsers, setManualUsers] = useState([]);
+  const [alert, setAlert] = useState(null);
 
   // Functions
+  const showAlert = ({ title, description, severity }) => {
+    setAlert({ title, description, severity });
+  };
+
   const _handleSubmitStandard = async (values, formikBag) => {
+    setAlert(null);
     // Check if the user exists
     try {
       const { data } = await firebase.getHackerByCode({
@@ -97,10 +105,16 @@ const CheckIn = ({ firebase }) => {
     } catch (error) {
       formikBag.setSubmitting(false);
       formikBag.setFieldError('code', error.message);
+      showAlert({
+        title: `Error: ${error.code}`,
+        description: error.message,
+        severity: 'error'
+      });
     }
   };
 
   const _handleSubmitManual = async (values, formikBag) => {
+    setAlert(null);
     // Get a list of users with matching first and last name
     // Filter out users who have already been checked-in
     // If there are multiple users, show select dialog
@@ -147,6 +161,11 @@ const CheckIn = ({ firebase }) => {
       formikBag.setSubmitting(false);
       formikBag.setFieldError('firstName', error.message);
       formikBag.setFieldError('lastName', error.message);
+      showAlert({
+        title: `Error: ${error.code}`,
+        description: error.message,
+        severity: 'error'
+      });
     }
   };
 
@@ -156,6 +175,7 @@ const CheckIn = ({ firebase }) => {
   };
 
   const _handleSubmitNFC = async (values, formikBag) => {
+    setAlert(null);
     try {
       await firebase.checkIn({
         firstName: user.firstName,
@@ -165,10 +185,20 @@ const CheckIn = ({ firebase }) => {
         nfcID: values.tagID
       });
       formikBag.setSubmitting(false);
+      showAlert({
+        title: `Success`,
+        description: `${user.firstName} ${user.lastName} has been successfully checked in.`,
+        severity: 'success'
+      });
       setUser(null);
     } catch (error) {
-      formikBag.setFieldError('tagID', error.message);
       formikBag.setSubmitting(false);
+      formikBag.setFieldError('tagID', error.message);
+      showAlert({
+        title: `Error: ${error.code}`,
+        description: error.message,
+        severity: 'error'
+      });
     }
   };
 
@@ -409,6 +439,15 @@ const CheckIn = ({ firebase }) => {
   return (
     <Box className={classes.root}>
       <PageTitle>Check-In</PageTitle>
+      <Zoom in={alert !== null}>
+        <Alert
+          variant='filled'
+          severity={alert !== null ? alert.severity : 'info'}
+        >
+          <AlertTitle>{alert !== null ? alert.title : 'Info'}</AlertTitle>
+          {alert !== null ? alert.description : 'Description'}
+        </Alert>
+      </Zoom>
       <Box>
         {/* NFC Pop-Up Modal */}
         <NFCModal />

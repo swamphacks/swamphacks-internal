@@ -11,6 +11,8 @@ import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MenuItem from '@material-ui/core/MenuItem';
 import { Alert, AlertTitle } from '@material-ui/lab';
+import Zoom from '@material-ui/core/Zoom';
+import Divider from '@material-ui/core/Divider';
 
 // Custom Components
 import { withFirebase } from '../components/Firebase';
@@ -18,7 +20,9 @@ import PageTitle from '../components/PageTitle';
 
 // Styles
 const useStyles = makeStyles(theme => ({
-  root: {},
+  root: {
+    position: 'relative'
+  },
   container: {
     display: 'flex',
     alignItems: 'center',
@@ -41,7 +45,8 @@ const useStyles = makeStyles(theme => ({
     justifyContent: 'center',
     flexDirection: 'column',
     padding: 20
-  }
+  },
+  alert: {}
 }));
 
 const availableTokens = [{ label: 'Dinner 1', value: 'dinner1' }];
@@ -51,6 +56,14 @@ const standardSchema = yup.object().shape({
   tagID: yup
     .string()
     .min(10, 'NFC Tag ID must be 10 characters.')
+    .required('This field is required.')
+});
+
+const codeSchema = yup.object().shape({
+  token: yup.string().required('This field is required.'),
+  code: yup
+    .string()
+    .min(4, 'Code must be 4 characters.')
     .required('This field is required.')
 });
 
@@ -64,19 +77,32 @@ const ScanPage = () => {
 
   const showAlert = ({ title, description, severity }) => {
     setAlert({ title, description, severity });
+  };
+
+  const codeSubmit = (values, formikBag) => {
+    setAlert(null);
+    console.log(values);
     setTimeout(() => {
-      setAlert(null);
-    }, 5000);
+      formikBag.setSubmitting(false);
+      showAlert({
+        title: 'Success',
+        description: `Successfully consumed token ${values.token}.`,
+        severity: 'success'
+      });
+    }, 500);
   };
 
   const standardSubmit = (values, formikBag) => {
+    setAlert(null);
     console.log(values);
-    formikBag.setSubmitting(false);
-    showAlert({
-      title: 'Success',
-      description: `Successfully consumed token ${values.token}.`,
-      severity: 'success'
-    });
+    setTimeout(() => {
+      formikBag.setSubmitting(false);
+      showAlert({
+        title: 'Success',
+        description: `Successfully consumed token ${values.token}.`,
+        severity: 'success'
+      });
+    }, 500);
   };
 
   const LoadingBox = () => (
@@ -84,6 +110,81 @@ const ScanPage = () => {
       <CircularProgress />
     </Box>
   );
+
+  const CodeForm = () => {
+    return (
+      <Box component='section' className={classes.container}>
+        <Typography variant='h6'>Code Token Consumer</Typography>
+        <Formik
+          initialValues={{ token: '', code: '' }}
+          validationSchema={codeSchema}
+          validateOnBlur={false}
+          validateOnChange={false}
+          onSubmit={codeSubmit}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            isSubmitting
+          }) => (
+            <Form className={classes.form}>
+              {isSubmitting ? (
+                <LoadingBox />
+              ) : (
+                <React.Fragment>
+                  <TextField
+                    select
+                    className={classes.textField}
+                    label='Token'
+                    name='token'
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.token}
+                    error={errors.token && touched.token ? true : false}
+                    helperText={
+                      errors.token && touched.token ? errors.token : ''
+                    }
+                  >
+                    {availableTokens.map(option => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                  <TextField
+                    className={classes.textField}
+                    inputProps={{ maxLength: 4 }}
+                    type='text'
+                    label='Code'
+                    name='code'
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    value={values.code}
+                    error={errors.code && touched.code ? true : false}
+                    helperText={errors.code && touched.code ? errors.code : ''}
+                  />
+                </React.Fragment>
+              )}
+
+              <Button
+                className={classes.submitButton}
+                type='submit'
+                disabled={isSubmitting}
+                variant='contained'
+                color='primary'
+              >
+                Submit
+              </Button>
+            </Form>
+          )}
+        </Formik>
+      </Box>
+    );
+  };
+
   const StandardForm = () => {
     return (
       <Box component='section' className={classes.container}>
@@ -161,17 +262,22 @@ const ScanPage = () => {
   };
 
   return (
-    <Box>
+    <Box className={classes.root}>
       <PageTitle>Scan</PageTitle>
+      <Zoom in={alert !== null}>
+        <Alert
+          variant='filled'
+          severity={alert !== null ? alert.severity : 'info'}
+        >
+          <AlertTitle>{alert !== null ? alert.title : 'Info'}</AlertTitle>
+          {alert !== null ? alert.description : 'Description'}
+        </Alert>
+      </Zoom>
       <Box>
         <StandardForm />
+        <Divider />
+        <CodeForm />
       </Box>
-      {alert !== null && (
-        <Alert severity={alert.severity}>
-          <AlertTitle>{alert.title}</AlertTitle>
-          {alert.description}
-        </Alert>
-      )}
     </Box>
   );
 };
