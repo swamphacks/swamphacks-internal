@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Formik, Form } from 'formik';
 import * as yup from 'yup';
 
@@ -49,8 +49,6 @@ const useStyles = makeStyles(theme => ({
   alert: {}
 }));
 
-const availableTokens = [{ label: 'Dinner 1', value: 'dinner1' }];
-
 const standardSchema = yup.object().shape({
   token: yup.string().required('This field is required.'),
   tagID: yup
@@ -71,40 +69,69 @@ const codeSchema = yup.object().shape({
 // Input that will read NFC ID
 // Message success/failed
 
-const ScanPage = () => {
+const ScanPage = ({ firebase }) => {
+  // Hooks
+  const [availableTokens, setAvailableTokens] = useState([]);
   const [alert, setAlert] = useState(null);
   const classes = useStyles();
 
+  useEffect(() => {
+    const getTokens = async () => {
+      const { data } = await firebase.getFoodTokens();
+      if (data !== availableTokens) {
+        setAvailableTokens(data);
+      }
+    };
+    getTokens();
+  }, []);
+
+  // Functions
   const showAlert = ({ title, description, severity }) => {
-    setAlert({ title, description, severity });
+    setAlert(null);
+    setTimeout(() => {
+      setAlert({ title, description, severity });
+    }, 100);
   };
 
-  const codeSubmit = (values, formikBag) => {
-    setAlert(null);
-    console.log(values);
-    setTimeout(() => {
+  const codeSubmit = async (values, formikBag) => {
+    try {
+      await firebase.consumeToken({ token: values.token, code: values.code });
       formikBag.setSubmitting(false);
       showAlert({
         title: 'Success',
         description: `Successfully consumed token ${values.token}.`,
         severity: 'success'
       });
-    }, 500);
+    } catch (error) {
+      formikBag.setSubmitting(false);
+      showAlert({
+        title: `Error: ${error.code}`,
+        description: error.message,
+        severity: 'error'
+      });
+    }
   };
 
-  const standardSubmit = (values, formikBag) => {
-    setAlert(null);
-    console.log(values);
-    setTimeout(() => {
+  const standardSubmit = async (values, formikBag) => {
+    try {
+      await firebase.consumeToken({ tagID: values.tagID, code: values.code });
       formikBag.setSubmitting(false);
       showAlert({
         title: 'Success',
         description: `Successfully consumed token ${values.token}.`,
         severity: 'success'
       });
-    }, 500);
+    } catch (error) {
+      formikBag.setSubmitting(false);
+      showAlert({
+        title: `Error: ${error.code}`,
+        description: error.message,
+        severity: 'error'
+      });
+    }
   };
 
+  // Components
   const LoadingBox = () => (
     <Box className={classes.container}>
       <CircularProgress />
@@ -261,6 +288,14 @@ const ScanPage = () => {
     );
   };
 
+  if (availableTokens.length === 0) {
+    return (
+      <Box>
+        <LoadingBox />
+      </Box>
+    );
+  }
+
   return (
     <Box className={classes.root}>
       <PageTitle>Scan</PageTitle>
@@ -282,4 +317,4 @@ const ScanPage = () => {
   );
 };
 
-export default ScanPage;
+export default withFirebase(ScanPage);

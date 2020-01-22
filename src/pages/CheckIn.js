@@ -81,11 +81,13 @@ const CheckIn = ({ firebase }) => {
 
   // Functions
   const showAlert = ({ title, description, severity }) => {
-    setAlert({ title, description, severity });
+    setAlert(null);
+    setTimeout(() => {
+      setAlert({ title, description, severity });
+    }, 100);
   };
 
   const _handleSubmitStandard = async (values, formikBag) => {
-    setAlert(null);
     // Check if the user exists
     try {
       const { data } = await firebase.getHackerByCode({
@@ -104,7 +106,6 @@ const CheckIn = ({ firebase }) => {
       setUser(u);
     } catch (error) {
       formikBag.setSubmitting(false);
-      formikBag.setFieldError('code', error.message);
       showAlert({
         title: `Error: ${error.code}`,
         description: error.message,
@@ -114,7 +115,6 @@ const CheckIn = ({ firebase }) => {
   };
 
   const _handleSubmitManual = async (values, formikBag) => {
-    setAlert(null);
     // Get a list of users with matching first and last name
     // Filter out users who have already been checked-in
     // If there are multiple users, show select dialog
@@ -159,8 +159,6 @@ const CheckIn = ({ firebase }) => {
       }
     } catch (error) {
       formikBag.setSubmitting(false);
-      formikBag.setFieldError('firstName', error.message);
-      formikBag.setFieldError('lastName', error.message);
       showAlert({
         title: `Error: ${error.code}`,
         description: error.message,

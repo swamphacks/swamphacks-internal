@@ -16,6 +16,8 @@ class Firebase {
     this.checkIn = this.functions.httpsCallable('checkIn');
     this.getHackerByCode = this.functions.httpsCallable('getHackerByCode');
     this.getHackersByName = this.functions.httpsCallable('getHackersByName');
+    this.getFoodTokens = this.functions.httpsCallable('getFoodTokens');
+    this.consumeToken = this.functions.httpsCallable('consumeToken');
   }
 
   signIn = async (email, password) => {
@@ -56,4 +58,4 @@ const withFirebase = Component => props => (
 
 export default Firebase;
 
-export {FirebaseContext, withFirebase};
+export { FirebaseContext, withFirebase };
