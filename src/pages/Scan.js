@@ -39,6 +39,16 @@ const useStyles = makeStyles(theme => ({
     marginTop: 10,
     marginBottom: 10
   },
+  backButton: {
+    marginRight: 10
+  },
+  backContainer: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    paddingBottom: 20
+  },
   form: {
     display: 'flex',
     alignItems: 'center',
@@ -49,8 +59,11 @@ const useStyles = makeStyles(theme => ({
   alert: {}
 }));
 
+const tokenSchema = yup.object().shape({
+  token: yup.string().required('This field is required.')
+});
+
 const standardSchema = yup.object().shape({
-  token: yup.string().required('This field is required.'),
   tagID: yup
     .string()
     .min(10, 'NFC Tag ID must be 10 characters.')
@@ -58,7 +71,6 @@ const standardSchema = yup.object().shape({
 });
 
 const codeSchema = yup.object().shape({
-  token: yup.string().required('This field is required.'),
   code: yup
     .string()
     .min(4, 'Code must be 4 characters.')
@@ -71,6 +83,7 @@ const codeSchema = yup.object().shape({
 
 const ScanPage = ({ firebase }) => {
   // Hooks
+  const [token, setToken] = useState('');
   const [availableTokens, setAvailableTokens] = useState([]);
   const [alert, setAlert] = useState(null);
   const classes = useStyles();
@@ -79,7 +92,7 @@ const ScanPage = ({ firebase }) => {
     const getTokens = async () => {
       const { data } = await firebase.getFoodTokens();
       if (data !== availableTokens) {
-        setAvailableTokens(data);
+        setAvailableTokens([...data, { label: 'Shirt', value: 'Shirt' }]);
       }
     };
     getTokens();
@@ -93,13 +106,23 @@ const ScanPage = ({ firebase }) => {
     }, 100);
   };
 
+  const handleBack = () => {
+    setToken('');
+    setAlert(null);
+  };
+
+  const tokenSubmit = (values, formikBag) => {
+    formikBag.setSubmitting(false);
+    setToken(values.token);
+  };
+
   const codeSubmit = async (values, formikBag) => {
     try {
-      await firebase.consumeToken({ token: values.token, code: values.code });
+      await firebase.consumeToken({ token: token, code: values.code });
       formikBag.setSubmitting(false);
       showAlert({
         title: 'Success',
-        description: `Successfully consumed token ${values.token}.`,
+        description: `Successfully consumed token ${token}.`,
         severity: 'success'
       });
     } catch (error) {
@@ -114,11 +137,11 @@ const ScanPage = ({ firebase }) => {
 
   const standardSubmit = async (values, formikBag) => {
     try {
-      await firebase.consumeToken({ tagID: values.tagID, code: values.code });
+      await firebase.consumeToken({ token: token, tagID: values.tagID });
       formikBag.setSubmitting(false);
       showAlert({
         title: 'Success',
-        description: `Successfully consumed token ${values.token}.`,
+        description: `Successfully consumed token ${token}.`,
         severity: 'success'
       });
     } catch (error) {
@@ -138,12 +161,70 @@ const ScanPage = ({ firebase }) => {
     </Box>
   );
 
+  const TokenForm = () => {
+    return (
+      <Box component='section' className={classes.container}>
+        <Typography variant='h6'>Choose a Token</Typography>
+        <Formik
+          initialValues={{ token: '' }}
+          validationSchema={tokenSchema}
+          validateOnBlur={false}
+          validateOnChange={false}
+          onSubmit={tokenSubmit}
+        >
+          {({
+            values,
+            errors,
+            touched,
+            handleChange,
+            handleBlur,
+            isSubmitting
+          }) => (
+            <Form className={classes.form}>
+              {isSubmitting ? (
+                <LoadingBox />
+              ) : (
+                <TextField
+                  select
+                  className={classes.textField}
+                  label='Token'
+                  name='token'
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.token}
+                  error={errors.token && touched.token ? true : false}
+                  helperText={errors.token && touched.token ? errors.token : ''}
+                >
+                  {availableTokens.map(option => (
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+
+              <Button
+                className={classes.submitButton}
+                type='submit'
+                disabled={isSubmitting}
+                variant='contained'
+                color='primary'
+              >
+                Submit
+              </Button>
+            </Form>
+          )}
+        </Formik>
+      </Box>
+    );
+  };
+
   const CodeForm = () => {
     return (
       <Box component='section' className={classes.container}>
-        <Typography variant='h6'>Code Token Consumer</Typography>
+        <Typography variant='h6'>Consume by Code</Typography>
         <Formik
-          initialValues={{ token: '', code: '' }}
+          initialValues={{ code: '' }}
           validationSchema={codeSchema}
           validateOnBlur={false}
           validateOnChange={false}
@@ -161,39 +242,18 @@ const ScanPage = ({ firebase }) => {
               {isSubmitting ? (
                 <LoadingBox />
               ) : (
-                <React.Fragment>
-                  <TextField
-                    select
-                    className={classes.textField}
-                    label='Token'
-                    name='token'
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.token}
-                    error={errors.token && touched.token ? true : false}
-                    helperText={
-                      errors.token && touched.token ? errors.token : ''
-                    }
-                  >
-                    {availableTokens.map(option => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    className={classes.textField}
-                    inputProps={{ maxLength: 4 }}
-                    type='text'
-                    label='Code'
-                    name='code'
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.code}
-                    error={errors.code && touched.code ? true : false}
-                    helperText={errors.code && touched.code ? errors.code : ''}
-                  />
-                </React.Fragment>
+                <TextField
+                  className={classes.textField}
+                  inputProps={{ maxLength: 4 }}
+                  type='text'
+                  label='Code'
+                  name='code'
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.code}
+                  error={errors.code && touched.code ? true : false}
+                  helperText={errors.code && touched.code ? errors.code : ''}
+                />
               )}
 
               <Button
@@ -215,9 +275,9 @@ const ScanPage = ({ firebase }) => {
   const StandardForm = () => {
     return (
       <Box component='section' className={classes.container}>
-        <Typography variant='h6'>Standard Token Consumer</Typography>
+        <Typography variant='h6'>Consume by Tag</Typography>
         <Formik
-          initialValues={{ token: '', tagID: '' }}
+          initialValues={{ tagID: '' }}
           validationSchema={standardSchema}
           validateOnBlur={false}
           validateOnChange={false}
@@ -235,41 +295,18 @@ const ScanPage = ({ firebase }) => {
               {isSubmitting ? (
                 <LoadingBox />
               ) : (
-                <React.Fragment>
-                  <TextField
-                    select
-                    className={classes.textField}
-                    label='Token'
-                    name='token'
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.token}
-                    error={errors.token && touched.token ? true : false}
-                    helperText={
-                      errors.token && touched.token ? errors.token : ''
-                    }
-                  >
-                    {availableTokens.map(option => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                  <TextField
-                    className={classes.textField}
-                    inputProps={{ maxLength: 10 }}
-                    type='text'
-                    label='Tag ID'
-                    name='tagID'
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    value={values.tagID}
-                    error={errors.tagID && touched.tagID ? true : false}
-                    helperText={
-                      errors.tagID && touched.tagID ? errors.tagID : ''
-                    }
-                  />
-                </React.Fragment>
+                <TextField
+                  className={classes.textField}
+                  inputProps={{ maxLength: 10 }}
+                  type='text'
+                  label='Tag ID'
+                  name='tagID'
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  value={values.tagID}
+                  error={errors.tagID && touched.tagID ? true : false}
+                  helperText={errors.tagID && touched.tagID ? errors.tagID : ''}
+                />
               )}
 
               <Button
@@ -299,6 +336,19 @@ const ScanPage = ({ firebase }) => {
   return (
     <Box className={classes.root}>
       <PageTitle>Scan</PageTitle>
+      {token && (
+        <Box className={classes.backContainer}>
+          <Button
+            className={classes.backButton}
+            variant='text'
+            color='primary'
+            onClick={handleBack}
+          >
+            Back
+          </Button>
+          <Typography variant='h6'>Token: {token}</Typography>
+        </Box>
+      )}
       <Zoom in={alert !== null}>
         <Alert
           variant='filled'
@@ -309,9 +359,14 @@ const ScanPage = ({ firebase }) => {
         </Alert>
       </Zoom>
       <Box>
-        <StandardForm />
-        <Divider />
-        <CodeForm />
+        {token === '' && <TokenForm />}
+        {token && (
+          <React.Fragment>
+            <StandardForm />
+            <Divider />
+            <CodeForm />
+          </React.Fragment>
+        )}
       </Box>
     </Box>
   );
