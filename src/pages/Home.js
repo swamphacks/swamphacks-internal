@@ -8,6 +8,7 @@ import Grid from '@material-ui/core/Grid';
 import { withFirebase } from '../components/Firebase';
 import SimpleDataDisplay from '../components/SimpleDataDisplay';
 import PageTitle from '../components/PageTitle';
+import Typography from '@material-ui/core/Typography';
 
 // Styles
 const useStyles = makeStyles(theme => ({
@@ -58,16 +59,22 @@ const Home = ({ firebase }) => {
   return (
     <div>
       <PageTitle>Home</PageTitle>
-      <Grid container spacing={2}>
-        {datas.map((d, index) => (
-          <Grid key={d.index} item xs={12} md={6} lg={4}>
-            <SimpleDataDisplay
-              label={d.label}
-              data={data[d.index] !== null ? data[d.index] : null}
-            />
-          </Grid>
-        ))}
-      </Grid>
+      {firebase.checkPermissionLevel() === 'ADMIN' ? (
+        <Grid container spacing={2}>
+          {datas.map((d, index) => (
+            <Grid key={d.index} item xs={12} md={6} lg={4}>
+              <SimpleDataDisplay
+                label={d.label}
+                data={data[d.index] !== null ? data[d.index] : null}
+              />
+            </Grid>
+          ))}
+        </Grid>
+      ) : (
+        <Typography variant='subtitle1'>
+          Access to this page is restricted.
+        </Typography>
+      )}
     </div>
   );
 };

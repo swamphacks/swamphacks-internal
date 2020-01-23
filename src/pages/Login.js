@@ -1,17 +1,17 @@
 import React from 'react';
-import {Formik, Form} from 'formik';
-import {useHistory} from 'react-router-dom';
+import { Formik, Form } from 'formik';
+import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
 // Material UI
-import {makeStyles} from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
 // Custom Components
-import {withFirebase} from '../components/Firebase';
+import { withFirebase } from '../components/Firebase';
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -53,13 +53,14 @@ const schema = yup.object().shape({
   password: yup.string().required('This field is required.')
 });
 
-const Login = ({firebase}) => {
+const Login = ({ firebase }) => {
   // Hooks
   const classes = useStyles();
   const history = useHistory();
   // Functions
   const _handleSubmit = async (values, formikBag) => {
-    const {email, password} = values;
+    const { email, password } = values;
+    console.log(values);
     try {
       const success = await firebase.signIn(email, password);
       if (!success) {
@@ -80,7 +81,7 @@ const Login = ({firebase}) => {
   const LoginForm = () => (
     <Box component='section' className={classes.container}>
       <Formik
-        initialValues={{email: '', password: ''}}
+        initialValues={{ email: '', password: '' }}
         validationSchema={schema}
         validateOnBlur={false}
         validateOnChange={false}

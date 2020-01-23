@@ -22,7 +22,18 @@ class Firebase {
 
   signIn = async (email, password) => {
     await this.auth.signInWithEmailAndPassword(email, password);
-    return this.auth.currentUser.email === 'sponsors@swamphacks.com';
+    return (
+      this.auth.currentUser.email === 'sponsors@swamphacks.com' ||
+      this.auth.currentUser.email === 'volunteer@swamphacks.com'
+    );
+  };
+
+  checkPermissionLevel = () => {
+    if (this.auth.currentUser.email === 'sponsors@swamphacks.com') {
+      return 'ADMIN';
+    } else {
+      return 'STANDARD';
+    }
   };
 
   signOut = async () => {
@@ -32,7 +43,9 @@ class Firebase {
   checkSignedIn = callback => {
     const unsubscriber = this.auth.onAuthStateChanged(user => {
       const val =
-        user !== null && user.email === 'sponsors@swamphacks.com'
+        user !== null &&
+        (user.email === 'sponsors@swamphacks.com' ||
+          user.email === 'volunteer@swamphacks.com')
           ? true
           : false;
       callback(val);
