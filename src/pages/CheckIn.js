@@ -18,12 +18,11 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import Zoom from '@material-ui/core/Zoom';
 
 // Custom Components
 import { withFirebase } from '../components/Firebase';
 import PageTitle from '../components/PageTitle';
+import AlertPopup from '../components/AlertPopup';
 
 // Styles
 const useStyles = makeStyles(theme => ({
@@ -81,10 +80,7 @@ const CheckIn = ({ firebase }) => {
 
   // Functions
   const showAlert = ({ title, description, severity }) => {
-    setAlert(null);
-    setTimeout(() => {
-      setAlert({ title, description, severity });
-    }, 100);
+    setAlert({ title, description, severity });
   };
 
   const _handleSubmitStandard = async (values, formikBag) => {
@@ -443,15 +439,7 @@ const CheckIn = ({ firebase }) => {
   return (
     <Box className={classes.root}>
       <PageTitle>Check-In</PageTitle>
-      <Zoom in={alert !== null}>
-        <Alert
-          variant='filled'
-          severity={alert !== null ? alert.severity : 'info'}
-        >
-          <AlertTitle>{alert !== null ? alert.title : 'Info'}</AlertTitle>
-          {alert !== null ? alert.description : 'Description'}
-        </Alert>
-      </Zoom>
+      <AlertPopup alert={alert} />
       <Box>
         {/* NFC Pop-Up Modal */}
         <NFCModal />

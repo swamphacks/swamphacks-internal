@@ -10,9 +10,8 @@ import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MenuItem from '@material-ui/core/MenuItem';
-import { Alert, AlertTitle } from '@material-ui/lab';
-import Zoom from '@material-ui/core/Zoom';
 import Divider from '@material-ui/core/Divider';
+import AlertPopup from '../components/AlertPopup';
 
 // Custom Components
 import { withFirebase } from '../components/Firebase';
@@ -100,15 +99,11 @@ const ScanPage = ({ firebase }) => {
 
   // Functions
   const showAlert = ({ title, description, severity }) => {
-    setAlert(null);
-    setTimeout(() => {
-      setAlert({ title, description, severity });
-    }, 100);
+    setAlert({ title, description, severity });
   };
 
   const handleBack = () => {
     setToken('');
-    setAlert(null);
   };
 
   const tokenSubmit = (values, formikBag) => {
@@ -336,6 +331,7 @@ const ScanPage = ({ firebase }) => {
   return (
     <Box className={classes.root}>
       <PageTitle>Scan</PageTitle>
+      <AlertPopup alert={alert} />
       {token && (
         <Box className={classes.backContainer}>
           <Button
@@ -349,15 +345,6 @@ const ScanPage = ({ firebase }) => {
           <Typography variant='h6'>Token: {token}</Typography>
         </Box>
       )}
-      <Zoom in={alert !== null}>
-        <Alert
-          variant='filled'
-          severity={alert !== null ? alert.severity : 'info'}
-        >
-          <AlertTitle>{alert !== null ? alert.title : 'Info'}</AlertTitle>
-          {alert !== null ? alert.description : 'Description'}
-        </Alert>
-      </Zoom>
       <Box>
         {token === '' && <TokenForm />}
         {token && (
