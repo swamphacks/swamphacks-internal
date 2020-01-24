@@ -98,8 +98,8 @@ const ScanPage = ({ firebase }) => {
   }, []);
 
   // Functions
-  const showAlert = ({ title, description, severity }) => {
-    setAlert({ title, description, severity });
+  const showAlert = ({ title, description, severity, persist }) => {
+    setAlert({ title, description, severity, persist });
   };
 
   const handleBack = () => {
@@ -113,13 +113,26 @@ const ScanPage = ({ firebase }) => {
 
   const codeSubmit = async (values, formikBag) => {
     try {
-      await firebase.consumeToken({ token: token, code: values.code });
-      formikBag.setSubmitting(false);
-      showAlert({
-        title: 'Success',
-        description: `Successfully consumed token ${token}.`,
-        severity: 'success'
+      const { data } = await firebase.consumeToken({
+        token: token,
+        code: values.code
       });
+      console.log(data);
+      formikBag.setSubmitting(false);
+      if (data && data.allergiesDiet !== 'None') {
+        showAlert({
+          title: 'Success: Restrictions',
+          description: `This hacker has food allergies/dietary restrictions: ${data.allergiesDiet}.`,
+          severity: 'warning',
+          persist: true
+        });
+      } else {
+        showAlert({
+          title: 'Success',
+          description: `Successfully consumed token ${token}.`,
+          severity: 'success'
+        });
+      }
     } catch (error) {
       formikBag.setSubmitting(false);
       showAlert({
@@ -132,13 +145,26 @@ const ScanPage = ({ firebase }) => {
 
   const standardSubmit = async (values, formikBag) => {
     try {
-      await firebase.consumeToken({ token: token, tagID: values.tagID });
-      formikBag.setSubmitting(false);
-      showAlert({
-        title: 'Success',
-        description: `Successfully consumed token ${token}.`,
-        severity: 'success'
+      const { data } = await firebase.consumeToken({
+        token: token,
+        tagID: values.tagID
       });
+      console.log(data);
+      formikBag.setSubmitting(false);
+      if (data && data.allergiesDiet !== 'None') {
+        showAlert({
+          title: 'Success: Restrictions',
+          description: `This hacker has food allergies/dietary restrictions: ${data.allergiesDiet}.`,
+          severity: 'warning',
+          persist: true
+        });
+      } else {
+        showAlert({
+          title: 'Success',
+          description: `Successfully consumed token ${token}.`,
+          severity: 'success'
+        });
+      }
     } catch (error) {
       formikBag.setSubmitting(false);
       showAlert({

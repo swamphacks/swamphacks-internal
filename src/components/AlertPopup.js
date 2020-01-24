@@ -28,16 +28,21 @@ const AlertPopup = ({ alert }) => {
   useEffect(() => {
     if (timeoutIDs.length > 0) {
       timeoutIDs.forEach(id => {
-        clearTimeout(id);
+        if (id) {
+          clearTimeout(id);
+        }
       });
     }
     setOpen(false);
     const id1 = setTimeout(() => {
       setOpen(true);
     }, 50);
-    const id2 = setTimeout(() => {
-      setOpen(false);
-    }, 5000);
+    const id2 =
+      alert && alert.persist
+        ? null
+        : setTimeout(() => {
+            setOpen(false);
+          }, 5000);
     setTimeoutIDs([id1, id2]);
   }, [alert]);
 
