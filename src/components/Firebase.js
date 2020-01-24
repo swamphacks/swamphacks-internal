@@ -18,6 +18,7 @@ class Firebase {
     this.getHackersByName = this.functions.httpsCallable('getHackersByName');
     this.getFoodTokens = this.functions.httpsCallable('getFoodTokens');
     this.consumeToken = this.functions.httpsCallable('consumeToken');
+    this.setYearConfig = this.functions.httpsCallable('setYearConfig');
   }
 
   signIn = async (email, password) => {
@@ -53,10 +54,10 @@ class Firebase {
     return unsubscriber;
   };
 
-  getMetadata = callback => {
+  getYearFields = callback => {
     const ref = this.firestore.collection('years').doc('2020');
     const unsubscriber = ref.onSnapshot(snap => {
-      const datas = snap.data().data;
+      const datas = snap.data();
       callback(datas);
     });
     return unsubscriber;
