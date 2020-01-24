@@ -119,10 +119,15 @@ const ScanPage = ({ firebase }) => {
       });
       console.log(data);
       formikBag.setSubmitting(false);
-      if (data && data.allergiesDiet !== 'None') {
+      if (
+        data &&
+        (data.allergiesDiet === 'Vegan' ||
+          data.allergiesDiet === 'Vegetarian' ||
+          data.allergiesDiet === 'Gluten Free')
+      ) {
         showAlert({
-          title: 'Success: Restrictions',
-          description: `This hacker has food allergies/dietary restrictions: ${data.allergiesDiet}.`,
+          title: `Restrictions: ${data.allergiesDiet}`,
+          description: `Note: this hacker has the following food allergies/dietary restrictions: ${data.allergiesDiet}.`,
           severity: 'warning',
           persist: true
         });
