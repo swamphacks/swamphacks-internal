@@ -134,7 +134,7 @@ const ScanPage = ({ firebase }) => {
       } else {
         showAlert({
           title: 'Success',
-          description: `Successfully consumed token ${token}.`,
+          description: `Successfully consumed token for ${token}.`,
           severity: 'success'
         });
       }
@@ -171,7 +171,7 @@ const ScanPage = ({ firebase }) => {
       } else {
         showAlert({
           title: 'Success',
-          description: `Successfully consumed token ${token}.`,
+          description: `Successfully consumed token for ${token}.`,
           severity: 'success'
         });
       }
@@ -195,7 +195,7 @@ const ScanPage = ({ firebase }) => {
   const TokenForm = () => {
     return (
       <Box component='section' className={classes.container}>
-        <Typography variant='h6'>Choose a Token</Typography>
+        <Typography variant='h6'>Choose an Event</Typography>
         <Formik
           initialValues={{ token: '' }}
           validationSchema={tokenSchema}
@@ -378,7 +378,7 @@ const ScanPage = ({ firebase }) => {
           >
             Back
           </Button>
-          <Typography variant='h6'>Token: {token}</Typography>
+          <Typography variant='h6'>Event: {token}</Typography>
         </Box>
       )}
       <Box>
