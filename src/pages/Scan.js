@@ -218,7 +218,7 @@ const ScanPage = ({ firebase }) => {
                 <TextField
                   select
                   className={classes.textField}
-                  label='Token'
+                  label='Event'
                   name='token'
                   onChange={handleChange}
                   onBlur={handleBlur}
