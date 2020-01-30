@@ -327,6 +327,7 @@ const ScanPage = ({ firebase }) => {
                 <LoadingBox />
               ) : (
                 <TextField
+                  autoFocus
                   className={classes.textField}
                   inputProps={{ maxLength: 10 }}
                   type='text'
